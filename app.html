@@ -45,7 +45,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* 배경 노이즈 텍스처 (index.html과 동일) */
     body::before {
       content: '';
       position: fixed; inset: 0; z-index: 0;
@@ -68,7 +67,6 @@
       -webkit-backdrop-filter: blur(10px);
     }
 
-    /* 아트 프레임 스타일 적용 (앱 로고 강조) */
     .logo-visual {
       width: 110px;
       height: 110px;
@@ -121,7 +119,6 @@
       word-break: keep-all;
     }
 
-    /* 공통 버튼 스타일 */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -141,7 +138,6 @@
     
     .btn:active { transform: scale(0.96); }
 
-    /* 정식 브라우저용 설치 버튼 (메인 재생 버튼 스타일 적용) */
     #installBtn {
       background: linear-gradient(135deg, var(--em3), var(--em));
       color: #fff;
@@ -152,7 +148,6 @@
     }
     #installBtn[hidden] { display: none !important; }
 
-    /* 외부 브라우저 실행 버튼 & 웹으로 보기 버튼 (다운로드 탭 버튼 스타일 적용) */
     .btn-outline, #viewBtn {
       background: rgba(56,189,248,.06);
       border: 1px solid rgba(56,189,248,.28);
@@ -167,7 +162,6 @@
 
     #viewBtn { font-size: 0.95rem; font-weight: 600; }
 
-    /* 카카오톡 등 인앱 브라우저용 안내 박스 */
     #inAppNotice {
       display: none;
       background-color: var(--card2);
@@ -203,14 +197,7 @@
     <h1>장평클럽 <span>Music</span> 앱 설치</h1>
     <p>장평클럽<br>전용 플레이어를 홈 화면에 설치하고<br>편리하게 감상하세요.</p>
 
-    <button id="installBtn" class="btn" hidden>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
-      앱 설치하기 (최적 화면)
-    </button>
+    <button id="installBtn" class="btn" hidden></button>
 
     <div id="inAppNotice">
       <p>현재 브라우저에서는 직접 설치가 지원되지 않습니다.</p>
@@ -231,25 +218,24 @@
       <button id="viewBtn" class="btn" onclick="javascript:window.location.replace('./');">
         그냥 웹으로 볼래요 (화면 잘림)
       </button>
-
     </div>
   </div>
 
   <script>
     let deferredPrompt;
+    let isAppInstalled = false;
     const installBtn = document.getElementById('installBtn');
     const inAppNotice = document.getElementById('inAppNotice');
     const androidOutBtn = document.getElementById('androidOutBtn');
     const iosInstructions = document.getElementById('iosInstructions');
 
-    // 인앱 브라우저 여부 확인 함수
+    // 1. 인앱 브라우저 감지 함수
     function isInAppBrowser() {
       const ua = navigator.userAgent.toLowerCase();
-      // 카카오톡, 라인, 페이스북, 인스타그램, 네이버 앱 등 감지
       return (ua.indexOf('kakao') > -1 || ua.indexOf('line') > -1 || ua.indexOf('fb_iab') > -1 || ua.indexOf('instagram') > -1 || ua.indexOf('naver') > -1);
     }
 
-    // OS 확인 함수
+    // 2. 운영체제 확인 함수
     function getOS() {
       const ua = navigator.userAgent;
       if (/android/i.test(ua)) return "android";
@@ -257,50 +243,107 @@
       return "other";
     }
 
-    // 초기 화면 설정
-    window.addEventListener('load', () => {
-      if (isInAppBrowser()) {
-        // 인앱 브라우저일 경우 설치 버튼 숨기고 안내창 표시
+    // 3. UI 변경: 앱 실행 모드
+    function setUIForPlay() {
+      installBtn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 3 19 12 5 21 5 3" fill="currentColor"></polygon>
+        </svg>
+        앱 실행하기 (플레이어로 이동)
+      `;
+      installBtn.hidden = false;
+      installBtn.onclick = () => {
+        window.location.replace('./index.html');
+      };
+    }
+
+    // 4. UI 변경: 앱 설치 모드
+    function setUIForInstall() {
+      installBtn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        앱 설치하기 (최적 화면)
+      `;
+      installBtn.hidden = false;
+      installBtn.onclick = async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response: ${outcome}`);
+        deferredPrompt = null;
+        installBtn.hidden = true;
+      };
+    }
+
+    // 5. 설치 여부 종합 점검
+    async function checkInstallationStatus() {
+      // (1) 이미 PWA 앱 내부에서 실행 중인 경우 즉시 플레이어로 강제 이동
+      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        window.location.replace('./index.html');
+        return;
+      }
+
+      // (2) 지원하는 브라우저 API를 통한 설치 여부 확인
+      if ('getInstalledRelatedApps' in navigator) {
+        const relatedApps = await navigator.getInstalledRelatedApps();
+        if (relatedApps.length > 0) isAppInstalled = true;
+      }
+
+      // (3) 로컬 스토리지를 통한 설치 기록 확인
+      if (localStorage.getItem('pwaInstalled') === 'true') {
+        isAppInstalled = true;
+      }
+
+      // 점검 결과 설치된 것으로 판단되면 '실행하기' 버튼 노출
+      if (isAppInstalled) {
+        setUIForPlay();
+      }
+    }
+
+    // --- 페이지 로드 시 실행 로직 ---
+    window.addEventListener('load', async () => {
+      await checkInstallationStatus();
+
+      // 설치되지 않은 인앱 브라우저 사용자 예외 처리
+      if (!isAppInstalled && isInAppBrowser()) {
         installBtn.style.setProperty('display', 'none', 'important');
         inAppNotice.style.display = 'block';
         
         const os = getOS();
         if (os === "android") {
-          // 안드로이드는 외부 브라우저로 열기 버튼 표시
           androidOutBtn.style.display = 'inline-flex';
-          // 현재 URL을 외부 브라우저에서 열도록 링크 설정 (intent 사용)
           androidOutBtn.href = 'intent://' + location.host + location.pathname + '#Intent;scheme=https;package=com.android.chrome;end';
         } else if (os === "ios") {
-          // iOS는 사파리 '홈 화면에 추가' 방법 안내
           iosInstructions.style.display = 'block';
         }
       }
     });
 
-    // --- 기존 PWA 설치 로직 (정식 브라우저용) ---
+    // --- 설치 가능한 상태일 때 브라우저가 호출하는 이벤트 ---
     window.addEventListener('beforeinstallprompt', (e) => {
-      // 인앱 브라우저가 아닐 때만 작동
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      // 설치 프롬프트가 뜬다는 것은 기기에 앱이 확실히 지워져 있다는 증거이므로 캐시 초기화
+      localStorage.removeItem('pwaInstalled');
+      isAppInstalled = false;
+
+      // 인앱 브라우저가 아닐 때만 설치 버튼 표시
       if (!isInAppBrowser()) {
-        e.preventDefault();
-        deferredPrompt = e;
-        installBtn.hidden = false;
+        setUIForInstall();
       }
     });
 
-    installBtn.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response: ${outcome}`);
-      deferredPrompt = null;
-      installBtn.hidden = true;
-    });
-
+    // --- 실제 설치가 완료되었을 때 실행되는 이벤트 ---
     window.addEventListener('appinstalled', () => {
+      localStorage.setItem('pwaInstalled', 'true'); // 설치 기록 저장
       installBtn.hidden = true;
       deferredPrompt = null;
-      // 설치 완료 후 메인 페이지로 이동
-      location.href = './index.html'; 
+      // 설치가 완료되면 자동으로 플레이어로 이동
+      window.location.replace('./index.html'); 
     });
   </script>
 </body>
