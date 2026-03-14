@@ -1,2 +1,1 @@
-# music
-music player
+# jpmusic.github.io
