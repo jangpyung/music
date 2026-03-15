@@ -162,27 +162,47 @@
 
     #viewBtn { font-size: 0.95rem; font-weight: 600; }
 
-    #inAppNotice {
-      display: none;
-      background-color: var(--card2);
-      padding: 24px 20px;
-      border-radius: 16px;
-      border: 1px solid var(--border-g);
-      margin-top: 10px;
-    }
-    
-    #inAppNotice p { 
-      margin-bottom: 18px; 
-      color: var(--text); 
-      font-size: 0.95rem; 
-      font-weight: 500;
-    }
+
     
     #iosInstructions {
       color: var(--em2) !important;
       background: rgba(56,189,248,.08);
       padding: 12px;
       border-radius: 10px;
+    }
+	
+	/* 카카오톡 등 인앱 안내 박스 */
+    #inAppNotice {
+      display: none;
+      background-color: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px dashed var(--sub-text);
+    }
+    #inAppNotice p { margin-bottom: 15px; color: var(--text); font-size: 0.95rem; }
+	
+	/* Safari 설치 안내 가이드 박스 */
+    #safariGuide {
+      display: none;
+      text-align: left;
+      background-color: rgba(212, 175, 55, 0.08); /* 옅은 골드 배경 */
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px dashed var(--accent);
+      margin-bottom: 25px;
+    }
+    #safariGuide p.title {
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    #safariGuide p.desc {
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.8;
+      margin-bottom: 0;
     }
   </style>
 </head>
