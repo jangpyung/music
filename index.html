@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -851,6 +852,7 @@ async function parseLRC(path) {
 /* ── Playback ── */
 async function loadTrack(idx, autoplay = false) {
   state.cur = idx;
+  updateShareQuery(idx);
   const s = songs[idx];
   titleEl.textContent  = miniTitle.textContent  = s.title;
   artistEl.textContent = miniArtist.textContent = s.artist;
@@ -972,10 +974,56 @@ async function registerSW() {
   } catch { swStatus.textContent = 'SW 오류'; }
 }
 
+/* ── Query param helpers ── */
+function getInitialTrackIndex() {
+  const params = new URLSearchParams(location.search);
+  const rawNo = params.get('no');
+  const rawTrack = params.get('track');
+  const rawTitle = params.get('title');
+
+  if (rawNo !== null) {
+    const no = parseInt(rawNo, 10);
+    if (Number.isInteger(no) && no >= 1 && no <= songs.length) return no - 1;
+  }
+
+  if (rawTrack !== null) {
+    const idx = parseInt(rawTrack, 10);
+    if (Number.isInteger(idx) && idx >= 0 && idx < songs.length) return idx;
+  }
+
+  if (rawTitle) {
+    const q = rawTitle.trim().toLowerCase();
+    const idx = songs.findIndex(s => s.title.toLowerCase() === q);
+    if (idx >= 0) return idx;
+  }
+
+  return 0;
+}
+
+function getInitialAutoplay() {
+  const params = new URLSearchParams(location.search);
+  if (params.has('autoplay')) {
+    const v = String(params.get('autoplay') || '').toLowerCase();
+    return v === '' || v === '1' || v === 'true' || v === 'yes' || v === 'on';
+  }
+  return params.has('no') || params.has('track') || params.has('title');
+}
+
+function updateShareQuery(idx) {
+  const url = new URL(location.href);
+  url.searchParams.set('no', String(idx + 1));
+  history.replaceState(null, '', url.toString());
+}
+
 /* ── Init ── */
 renderPlaylist();
 renderLinks();
-loadTrack(0, false);
+const initialIndex = getInitialTrackIndex();
+const initialAutoplay = getInitialAutoplay();
+loadTrack(initialIndex, false).then(() => {
+  updateShareQuery(initialIndex);
+  if (initialAutoplay) playCurrent();
+});
 audio.volume = +volumeEl.value;
 registerSW();
 </script>
