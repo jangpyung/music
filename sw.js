@@ -1,11 +1,14 @@
-const CACHE_VERSION = 'jpclubmusic-pwa-v1';
+const CACHE_VERSION = 'jpclubmusic-pwa-v2';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png',
+  './style.css',
+  './app.js',
+  './songs.json'
 ];
 
 self.addEventListener('install', event => {
@@ -22,6 +25,10 @@ self.addEventListener('activate', event => {
       keys.filter(key => key !== CACHE_VERSION).map(key => caches.delete(key))
     );
     await self.clients.claim();
+    // Notify all controlled pages that a new version is active
+    self.clients.matchAll({type: 'window'}).then(clients => {
+      clients.forEach(c => c.postMessage({ type: 'SW_UPDATED' }));
+    });
   })());
 });
 
