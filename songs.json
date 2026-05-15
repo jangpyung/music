@@ -62,5 +62,13 @@
     "url": "./sound/08.장평클럽 폼난다(리메이크).mp3",
     "lrc": "./sound/08.장평클럽 폼난다(리메이크).lrc",
     "youtube": ""
+  },
+  {
+    "title": "Court Light - Part1",
+    "artist": "TRINITY",
+    "cover": "./sound/09.Court Light - Part1.png",
+    "url": "./sound/09.Court Light - Part1.mp3",
+    "lrc": "./sound/09.Court Light - Part1.lrc",
+    "youtube": "https://youtu.be/dPT_D0kLLxg"
   }
 ]
