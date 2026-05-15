@@ -70,5 +70,13 @@
     "url": "./sound/09.Court Light - Part1.mp3",
     "lrc": "./sound/09.Court Light - Part1.lrc",
     "youtube": "https://youtu.be/dPT_D0kLLxg"
+  },
+  {
+    "title": "Court Light - Part2",
+    "artist": "TRINITY",
+    "cover": "./sound/10.Court Light - Part2.png",
+    "url": "./sound/10.Court Light - Part2.mp3",
+    "lrc": "./sound/10.Court Light - Part2.lrc",
+    "youtube": ""
   }
 ]
