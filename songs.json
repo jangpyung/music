@@ -78,5 +78,23 @@
     "url": "./sound/10.Court Light - Part2.mp3",
     "lrc": "./sound/10.Court Light - Part2.lrc",
     "youtube": "https://youtu.be/7fOOFZSw20I"
-  }
+  },
+  {
+      "id": "Between-the-Light",
+      "title": "Between the Light",
+      "artist": "TRINITY",
+      "cover": "./sound/11.Between the Light.png?v=20260606",
+      "url": "./sound/11.Between the Light.mp3?v=20260606",
+      "lrc": "./sound/11.Between the Light.lrc?v=20260606",
+      "youtube": "https://youtu.be/icEyWVHpTjc"
+    },
+    {
+      "id": "The-voice-that-believes-in-you",
+      "title": "너를 믿는 목소리",
+      "artist": "TRINITY - JIWOO",
+      "cover": "./sound/12.너를 믿는 목소리.png?v=20260621",
+      "url": "./sound/12.너를 믿는 목소리.mp3?v=20260621",
+      "lrc": "./sound/12.너를 믿는 목소리.lrc?v=20260621",
+      "youtube": ""
+    }
 ]
